@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#122c4e" />
+  <meta name="description" content="CRM de visitas médicas: perfiles reutilizables, segmentación e historial por médico." />
+  <title>CRM de Visitas Médicas | Medical Store</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <section id="login-screen" class="login-screen" hidden>
+    <div class="login-card">
+      <div class="login-emblem" aria-hidden="true">MS<span>+</span></div>
+      <p class="eyebrow">MEDICAL STORE · CRM</p>
+      <h1>Bienvenido de nuevo</h1>
+      <p class="muted">Ingresa con tu cuenta autorizada para gestionar médicos y registrar visitas.</p>
+      <form id="login-form" class="login-form">
+        <div class="field"><label for="login-email">Correo electrónico</label><input id="login-email" type="email" autocomplete="username" required placeholder="tu.correo@empresa.com" /></div>
+        <div class="field"><label for="login-password">Contraseña</label><input id="login-password" type="password" autocomplete="current-password" required placeholder="Tu contraseña" /></div>
+        <p id="login-error" class="error-text" role="alert" hidden></p>
+        <button id="login-button" class="button primary full" type="submit">Ingresar al CRM</button>
+      </form>
+      <p class="login-foot">Acceso exclusivo para personal autorizado.</p>
+    </div>
+  </section>
+
+  <div id="app" class="app" hidden>
+    <header class="site-header">
+      <div class="header-inner">
+        <div class="brand">
+          <div class="brand-symbol">MS<span>+</span></div>
+          <div><span class="brand-name">MEDICAL STORE</span><span class="brand-caption">CRM · Visitas médicas</span></div>
+        </div>
+        <div class="header-actions">
+          <span id="mode-pill" class="mode-pill" hidden>Modo demostración</span>
+          <span id="user-label" class="user-label" hidden></span>
+          <button id="logout-button" class="icon-button" title="Cerrar sesión" aria-label="Cerrar sesión" hidden>
+            <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <div id="demo-banner" class="demo-banner" hidden>
+      <span>Vista previa: usa médicos ficticios. Los cambios no se guardan en Supabase ni se conservan al recargar.</span>
+    </div>
+
+    <main class="main-wrap">
+      <section class="page-intro">
+        <div>
+          <div class="section-kicker"><span class="kicker-dot"></span> INTELIGENCIA COMERCIAL</div>
+          <h1>Gestión de visitas <span>médicas</span></h1>
+          <p>Una ficha por médico. Todas sus visitas en un solo lugar.</p>
+        </div>
+        <div class="intro-badge"><span class="badge-icon">✦</span> CRM de campo</div>
+      </section>
+
+      <section class="workspace">
+        <aside class="directory card-panel">
+          <div class="directory-heading"><div><p class="tiny-title">DIRECTORIO</p><h2>Buscar médico</h2></div><span class="counter-dot" id="result-count">0</span></div>
+          <label class="search-wrap" for="doctor-search">
+            <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>
+            <input id="doctor-search" type="search" placeholder="Nombre o CMP" autocomplete="off" />
+          </label>
+          <button id="new-doctor" class="button secondary full create-button" type="button"><span class="plus">＋</span> Registrar nuevo médico</button>
+          <p class="directory-help">Selecciona un médico para continuar con una nueva visita.</p>
+          <div id="doctor-results" class="doctor-results" aria-live="polite"></div>
+          <div class="directory-bottom"><span class="status-dot"></span> <span id="directory-status">Directorio disponible</span></div>
+        </aside>
+
+        <section class="content-column">
+          <div id="selection-placeholder" class="selection-placeholder card-panel">
+            <div class="placeholder-icon" aria-hidden="true">
+              <svg viewBox="0 0 64 64" fill="none" width="72" height="72"><rect x="10" y="9" width="44" height="48" rx="10" stroke="#abc0d7" stroke-width="2"/><circle cx="32" cy="27" r="8" stroke="#5e86b0" stroke-width="2"/><path d="M19 46c2-8 24-8 26 0" stroke="#5e86b0" stroke-width="2" stroke-linecap="round"/><path d="M46 14h12m-6-6v12" stroke="#2b9ba7" stroke-width="3" stroke-linecap="round"/></svg>
+            </div>
+            <h2>Selecciona un médico para comenzar</h2>
+            <p>Busca por nombre o CMP para registrar una visita, o crea una ficha nueva para un médico que visitas por primera vez.</p>
+            <button id="placeholder-new" class="button primary" type="button">Crear ficha médica <span>→</span></button>
+          </div>
+
+          <div id="active-workspace" hidden>
+            <div class="doctor-summary card-panel">
+              <div class="avatar" id="doctor-avatar">DR</div>
+              <div class="doctor-heading"><span id="doctor-status" class="pill">Ficha médica</span><h2 id="doctor-name">Nuevo médico</h2><div class="doctor-meta" id="doctor-meta">Completa sus datos para registrar la visita.</div></div>
+              <button id="switch-doctor" class="subtle-button" type="button">Cambiar</button>
+            </div>
+
+            <div class="tabbar" role="tablist" aria-label="Secciones del médico">
+              <button id="tab-profile" class="tab active" role="tab" aria-selected="true" type="button"><span>01</span> Ficha</button>
+              <button id="tab-visit" class="tab" role="tab" aria-selected="false" type="button"><span>02</span> Nueva visita</button>
+              <button id="tab-history" class="tab" role="tab" aria-selected="false" type="button"><span>03</span> Historial</button>
+            </div>
+
+            <section id="panel-profile" class="form-panel card-panel" role="tabpanel">
+              <div class="panel-heading"><div><p class="tiny-title">PERFIL DEL MÉDICO</p><h2 id="profile-title">Crear ficha</h2><p id="profile-description">Los datos guardados se reutilizan en cada visita.</p></div><span class="panel-head-icon">▤</span></div>
+              <form id="profile-form" novalidate><div id="profile-groups"></div>
+                <div class="form-actions"><button id="save-profile" class="button primary full-mobile" type="submit">Guardar ficha y continuar <span>→</span></button></div>
+              </form>
+            </section>
+
+            <section id="panel-visit" class="form-panel card-panel" role="tabpanel" hidden>
+              <div class="panel-heading"><div><p class="tiny-title">ACTIVIDAD COMERCIAL</p><h2>Registrar nueva visita</h2><p>La información del médico ya está cargada. Completa únicamente lo ocurrido en esta visita.</p></div><span class="panel-head-icon">✎</span></div>
+              <div class="visit-notice"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><path d="M12 11v6m0-10h.01"/></svg><span>Esta visita tendrá un registro independiente y conservará una copia de la segmentación del médico al momento de guardarla.</span></div>
+              <form id="visit-form" novalidate><div id="visit-fields" class="fields-grid"></div>
+                <div class="form-actions"><button id="save-visit" class="button primary full-mobile" type="submit">Guardar registro de visita <span>✓</span></button></div>
+              </form>
+            </section>
+
+            <section id="panel-history" class="form-panel card-panel" role="tabpanel" hidden>
+              <div class="panel-heading"><div><p class="tiny-title">SEGUIMIENTO</p><h2>Historial de visitas</h2><p>Consulta los acuerdos, objeciones y planes de acción anteriores.</p></div><span class="panel-head-icon">↺</span></div>
+              <div id="history-list" class="history-list"></div>
+              <button id="history-new" class="button secondary" type="button">＋ Registrar otra visita</button>
+            </section>
+          </div>
+        </section>
+      </section>
+      <footer class="page-footer">MEDICAL STORE ASOCIADOS <span>·</span> CRM de visitas médicas</footer>
+    </main>
+  </div>
+  <script src="config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
